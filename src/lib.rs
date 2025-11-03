@@ -11,11 +11,13 @@ use tokio::task::LocalSet;
 use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
 use tracing_subscriber::EnvFilter;
 
+mod cli;
 mod codex_agent;
 mod command_executor;
 mod conversation;
 mod prompt_args;
 mod read_file_tool;
+mod session_store;
 mod tool_executor;
 
 pub static ACP_CLIENT: OnceLock<Arc<AgentSideConnection>> = OnceLock::new();
@@ -30,7 +32,7 @@ pub static ACP_CLIENT: OnceLock<Arc<AgentSideConnection>> = OnceLock::new();
 /// If unable to parse the config or start the program.
 pub async fn run_main(
     _codex_linux_sandbox_exe: Option<PathBuf>,
-    cli_config_overrides: CliConfigOverrides,
+    mut cli_config_overrides: CliConfigOverrides,
 ) -> IoResult<()> {
     // Install a simple subscriber so `tracing` output is visible.
     // Users can control the log level with `RUST_LOG`.
@@ -38,6 +40,13 @@ pub async fn run_main(
         .with_writer(std::io::stderr)
         .with_env_filter(EnvFilter::from_default_env())
         .init();
+
+    let session_persist = cli::parse_launch_args().map_err(|err| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("failed to parse arguments: {err}"),
+        )
+    })?;
 
     // Parse CLI overrides and load configuration
     let cli_kv_overrides = cli_config_overrides.parse_overrides().map_err(|e| {
@@ -59,8 +68,12 @@ pub async fn run_main(
     read_file_tool::ensure_read_file_tool_enabled(&mut config);
     read_file_tool::register_remote_read_file_handler();
 
+    let persistence_settings =
+        session_store::SessionPersistenceSettings::resolve(&config, &session_persist);
+    let session_store = session_store::SessionStore::new(persistence_settings);
+
     // Create our Agent implementation with notification channel
-    let agent = Rc::new(codex_agent::CodexAgent::new(config));
+    let agent = Rc::new(codex_agent::CodexAgent::new(config, session_store));
 
     let stdin = tokio::io::stdin().compat();
     let stdout = tokio::io::stdout().compat_write();
