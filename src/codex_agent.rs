@@ -422,8 +422,11 @@ impl Agent for CodexAgent {
         // Check before sending if authentication was successful or not
         self.check_auth()?;
 
-        // Check if we have this session already
-        if let Some(conversation) = self.sessions.borrow().get(&request.session_id).cloned() {
+        let conversation = {
+            let sessions = self.sessions.borrow();
+            sessions.get(&request.session_id).cloned()
+        };
+        if let Some(conversation) = conversation {
             return conversation.load().await;
         }
 
