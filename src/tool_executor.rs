@@ -18,6 +18,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::runtime::Handle;
+use tracing::warn;
 
 #[derive(Clone, Default)]
 pub struct HelloWorldExecutor;
@@ -236,11 +237,19 @@ async fn read_remote_file(
     match client_call(move |client| async move { client.read_text_file(request).await }).await? {
         Ok(response) => Ok(Some(response.content)),
         Err(err) if err.code == ErrorCode::RESOURCE_NOT_FOUND.code => Ok(None),
-        Err(err) => Err(ToolError::Rejected(format!(
-            "failed to read {}: {}",
-            display_path(path),
-            err.message
-        ))),
+        Err(err) => {
+            warn!(
+                "ACP read_text_file failed for {} (code={}): {}",
+                display_path(path),
+                err.code,
+                err.message
+            );
+            Err(ToolError::Rejected(format!(
+                "failed to read {}: {}",
+                display_path(path),
+                err.message
+            )))
+        }
     }
 }
 
@@ -260,6 +269,12 @@ async fn write_remote_file(
     client_call(move |client| async move { client.write_text_file(request).await })
         .await?
         .map_err(|err| {
+            warn!(
+                "ACP write_text_file failed for {} (code={}): {}",
+                display_path(path),
+                err.code,
+                err.message
+            );
             ToolError::Rejected(format!(
                 "failed to write {}: {}",
                 display_path(path),

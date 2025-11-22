@@ -104,6 +104,13 @@ impl Agent for CodexAgent {
         let protocol_version = V1;
 
         *self.client_capabilities.lock().unwrap() = client_capabilities;
+        {
+            let guard = self.client_capabilities.lock().unwrap();
+            info!(
+                "ACP initialize: client fs.read_text_file={} fs.write_text_file={} terminal={}",
+                guard.fs.read_text_file, guard.fs.write_text_file, guard.terminal
+            );
+        }
 
         let agent_capabilities = AgentCapabilities {
             load_session: false, // Currently only able to do in-memory... which doesn't help us at the moment
