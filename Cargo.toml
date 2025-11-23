@@ -20,15 +20,15 @@ path = "src/lib.rs"
 agent-client-protocol = { version = "0.7.0", features = ["unstable"] }
 anyhow = "1"
 async-trait = "0.1"
-mcp-types = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "mcp-types" }
-codex-apply-patch = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-apply-patch" }
-codex-arg0 = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-arg0" }
-codex-common = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-common", features = ["cli"] }
-codex-core = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-core" }
-codex-mcp-server = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-mcp-server" }
-codex-protocol = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-protocol" }
-codex-login = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-login" }
-codex-utils-string = { git = "https://github.com/sagemathinc/codex", rev = "bfb49c095ce6fe932e3f71a956d618ccd6742bde", package = "codex-utils-string" }
+mcp-types = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "mcp-types" }
+codex-apply-patch = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-apply-patch" }
+codex-arg0 = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-arg0" }
+codex-common = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-common", features = ["cli"] }
+codex-core = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-core" }
+codex-mcp-server = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-mcp-server" }
+codex-protocol = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-protocol" }
+codex-login = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-login" }
+codex-utils-string = { git = "https://github.com/sagemathinc/codex", rev = "6111a7d9ef5637c077fc4c9200911ebf7249f3a5", package = "codex-utils-string" }
 itertools = "0.14.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
