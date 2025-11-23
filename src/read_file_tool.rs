@@ -1,17 +1,20 @@
 use crate::ACP_CLIENT;
-use agent_client_protocol::{ReadTextFileRequest, SessionId};
+use agent_client_protocol::{
+    AgentSideConnection, Client, Error, ReadTextFileRequest, SessionId,
+};
 use async_trait::async_trait;
-use codex_core::config::Config;
-use codex_core::function_tool::FunctionCallError;
-use codex_core::tools::context::{ToolInvocation, ToolOutput, ToolPayload};
-use codex_core::tools::registry::{ToolHandler, ToolKind};
-use codex_core::tools::spec::register_external_tool_handler;
+use codex_core::{
+    config::Config, register_external_tool_handler, FunctionCallError, ToolHandler, ToolInvocation,
+    ToolKind, ToolOutput, ToolPayload,
+};
 use codex_protocol::ConversationId;
 use codex_utils_string::take_bytes_at_char_boundary;
 use serde::Deserialize;
 use std::collections::VecDeque;
+use std::future::Future;
 use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::runtime::Handle;
 
 pub fn register_remote_read_file_handler() {
     register_external_tool_handler("read_file", Arc::new(RemoteReadFileHandler::default()));
@@ -41,9 +44,9 @@ impl ToolHandler for RemoteReadFileHandler {
     }
 
     async fn handle(&self, invocation: ToolInvocation) -> Result<ToolOutput, FunctionCallError> {
-        let ToolInvocation {
-            session, payload, ..
-        } = invocation;
+        let payload = invocation.payload.clone();
+        let session_id =
+            session_id_from_conversation_id(&invocation.conversation_id());
 
         let arguments = match payload {
             ToolPayload::Function { arguments } => arguments,
@@ -86,8 +89,6 @@ impl ToolHandler for RemoteReadFileHandler {
                 "file_path must be an absolute path".to_string(),
             ));
         }
-
-        let session_id = session_id_from_conversation_id(&session.conversation_id());
 
         let lines = match mode {
             ReadMode::Slice => read_slice(&session_id, path, offset, limit).await?,
@@ -137,6 +138,18 @@ struct IndentationArgs {
     include_header: bool,
     #[serde(default)]
     max_lines: Option<usize>,
+}
+
+impl Default for IndentationArgs {
+    fn default() -> Self {
+        Self {
+            anchor_line: None,
+            max_levels: defaults::max_levels(),
+            include_siblings: defaults::include_siblings(),
+            include_header: defaults::include_header(),
+            max_lines: None,
+        }
+    }
 }
 
 impl Default for ReadMode {
@@ -428,10 +441,6 @@ async fn fetch_text(
     line: Option<usize>,
     limit: Option<usize>,
 ) -> Result<String, FunctionCallError> {
-    let client = ACP_CLIENT
-        .get()
-        .ok_or_else(|| FunctionCallError::Fatal("ACP client not initialized".to_string()))?;
-
     let request = ReadTextFileRequest {
         session_id: session_id.clone(),
         path,
@@ -440,13 +449,28 @@ async fn fetch_text(
         meta: None,
     };
 
-    client
-        .read_text_file(request)
+    call_client(move |client| async move { client.read_text_file(request).await })
         .await
         .map(|res| res.content)
-        .map_err(|err| FunctionCallError::RespondToModel(format!("failed to read file: {err}")))
 }
 
 fn session_id_from_conversation_id(id: &ConversationId) -> SessionId {
     SessionId(id.to_string().into())
+}
+
+async fn call_client<R, F, Fut>(f: F) -> Result<R, FunctionCallError>
+where
+    R: Send + 'static,
+    F: FnOnce(Arc<AgentSideConnection>) -> Fut + Send + 'static,
+    Fut: Future<Output = Result<R, Error>> + 'static,
+{
+    let client = ACP_CLIENT
+        .get()
+        .ok_or_else(|| FunctionCallError::Fatal("ACP client not initialized".to_string()))?
+        .clone();
+    let handle = Handle::current();
+    tokio::task::spawn_blocking(move || handle.block_on(async move { f(client).await }))
+        .await
+        .map_err(|err| FunctionCallError::Fatal(format!("ACP client call failed: {err}")))?
+        .map_err(|err| FunctionCallError::RespondToModel(format!("ACP client error: {err}")))
 }
