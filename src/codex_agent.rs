@@ -25,7 +25,7 @@ use std::{
 };
 use tracing::{debug, info};
 
-use crate::{conversation::Conversation, tool_executor::HelloWorldExecutor};
+use crate::{conversation::Conversation, tool_executor::ACPExecutor};
 
 /// The Codex implementation of the ACP Agent trait.
 ///
@@ -58,7 +58,7 @@ impl CodexAgent {
         let conversation_manager = ConversationManager::with_tool_executor(
             auth_manager.clone(),
             SessionSource::Unknown,
-            HelloWorldExecutor::shared(),
+            ACPExecutor::shared(),
         );
 
         Self {

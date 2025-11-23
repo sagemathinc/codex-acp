@@ -15,6 +15,7 @@ mod codex_agent;
 mod command_executor;
 mod conversation;
 mod prompt_args;
+mod read_file_tool;
 mod tool_executor;
 
 pub static ACP_CLIENT: OnceLock<Arc<AgentSideConnection>> = OnceLock::new();
@@ -46,7 +47,7 @@ pub async fn run_main(
         )
     })?;
 
-    let config = Config::load_with_cli_overrides(cli_kv_overrides, ConfigOverrides::default())
+    let mut config = Config::load_with_cli_overrides(cli_kv_overrides, ConfigOverrides::default())
         .await
         .map_err(|e| {
             std::io::Error::new(
@@ -54,6 +55,9 @@ pub async fn run_main(
                 format!("error loading config: {e}"),
             )
         })?;
+
+    read_file_tool::ensure_read_file_tool_enabled(&mut config);
+    read_file_tool::register_remote_read_file_handler();
 
     // Create our Agent implementation with notification channel
     let agent = Rc::new(codex_agent::CodexAgent::new(config));

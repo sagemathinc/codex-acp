@@ -21,16 +21,16 @@ use tokio::runtime::Handle;
 use tracing::warn;
 
 #[derive(Clone, Default)]
-pub struct HelloWorldExecutor;
+pub struct ACPExecutor;
 
-impl HelloWorldExecutor {
+impl ACPExecutor {
     pub fn shared() -> DynToolExecutor {
         Arc::new(Self::default())
     }
 }
 
 #[async_trait]
-impl ToolExecutor for HelloWorldExecutor {
+impl ToolExecutor for ACPExecutor {
     async fn run_shell(
         &self,
         req: &ShellRequest,

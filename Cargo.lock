@@ -613,9 +613,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.46"
+version = "1.2.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97463e1064cb1b1c1384ad0a0b9c8abd0988e2a91f52606c80ef14aadb63e36"
+checksum = "cd405d82c84ff7f35739f175f67d8b9fb7687a0e84ccdc78bd3568839827cf07"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -774,6 +774,7 @@ dependencies = [
 [[package]]
 name = "codex-app-server-protocol"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "clap",
@@ -791,6 +792,7 @@ dependencies = [
 [[package]]
 name = "codex-apply-patch"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "similar",
@@ -802,6 +804,7 @@ dependencies = [
 [[package]]
 name = "codex-arg0"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "codex-apply-patch",
@@ -815,6 +818,7 @@ dependencies = [
 [[package]]
 name = "codex-async-utils"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "async-trait",
  "tokio",
@@ -824,6 +828,7 @@ dependencies = [
 [[package]]
 name = "codex-common"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "clap",
  "codex-app-server-protocol",
@@ -839,6 +844,7 @@ dependencies = [
 [[package]]
 name = "codex-core"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "askama",
@@ -870,7 +876,7 @@ dependencies = [
  "eventsource-stream",
  "futures",
  "http",
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "keyring",
  "landlock",
  "libc",
@@ -911,6 +917,7 @@ dependencies = [
 [[package]]
 name = "codex-execpolicy"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "clap",
@@ -925,6 +932,7 @@ dependencies = [
 [[package]]
 name = "codex-file-search"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "clap",
@@ -938,6 +946,7 @@ dependencies = [
 [[package]]
 name = "codex-git"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "once_cell",
  "regex",
@@ -952,6 +961,7 @@ dependencies = [
 [[package]]
 name = "codex-keyring-store"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "keyring",
  "tracing",
@@ -960,6 +970,7 @@ dependencies = [
 [[package]]
 name = "codex-linux-sandbox"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "clap",
  "codex-core",
@@ -971,6 +982,7 @@ dependencies = [
 [[package]]
 name = "codex-lmstudio"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "codex-core",
  "reqwest",
@@ -983,6 +995,7 @@ dependencies = [
 [[package]]
 name = "codex-login"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "base64",
  "chrono",
@@ -1004,6 +1017,7 @@ dependencies = [
 [[package]]
 name = "codex-mcp-server"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "codex-arg0",
@@ -1024,6 +1038,7 @@ dependencies = [
 [[package]]
 name = "codex-ollama"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "async-stream",
  "bytes",
@@ -1039,6 +1054,7 @@ dependencies = [
 [[package]]
 name = "codex-otel"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "chrono",
  "codex-app-server-protocol",
@@ -1061,6 +1077,7 @@ dependencies = [
 [[package]]
 name = "codex-protocol"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "base64",
  "codex-git",
@@ -1085,6 +1102,7 @@ dependencies = [
 [[package]]
 name = "codex-rmcp-client"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "axum",
@@ -1111,6 +1129,7 @@ dependencies = [
 [[package]]
 name = "codex-utils-cache"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "lru",
  "sha1",
@@ -1120,6 +1139,7 @@ dependencies = [
 [[package]]
 name = "codex-utils-image"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "base64",
  "codex-utils-cache",
@@ -1131,6 +1151,7 @@ dependencies = [
 [[package]]
 name = "codex-utils-json-to-toml"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "serde_json",
  "toml",
@@ -1139,6 +1160,7 @@ dependencies = [
 [[package]]
 name = "codex-utils-pty"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "portable-pty",
@@ -1148,6 +1170,7 @@ dependencies = [
 [[package]]
 name = "codex-utils-readiness"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "async-trait",
  "thiserror 2.0.17",
@@ -1158,10 +1181,12 @@ dependencies = [
 [[package]]
 name = "codex-utils-string"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 
 [[package]]
 name = "codex-windows-sandbox"
 version = "0.1.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "anyhow",
  "codex-protocol",
@@ -2019,7 +2044,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "http",
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "slab",
  "tokio",
  "tokio-util",
@@ -2055,9 +2080,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d"
+checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
 
 [[package]]
 name = "heck"
@@ -2473,12 +2498,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.12.0"
+version = "2.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6717a8d2a5a929a1a2eb43a12812498ed141a0bcfb7e8f7844fbdbe4303bba9f"
+checksum = "0ad4bb2b565bca0645f4d68c5c9af97fba094e9791da685bf83cb5f3ce74acf2"
 dependencies = [
  "equivalent",
- "hashbrown 0.16.0",
+ "hashbrown 0.16.1",
  "serde",
  "serde_core",
 ]
@@ -2651,9 +2676,9 @@ dependencies = [
 
 [[package]]
 name = "landlock"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "affe8b77dce5b172f8e290bd801b12832a77cd1942d1ea98259916e89d5829d6"
+checksum = "49fefd6652c57d68aaa32544a4c0e642929725bdc1fd929367cdeb673ab81088"
 dependencies = [
  "enumflags2",
  "libc",
@@ -2809,6 +2834,7 @@ checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 [[package]]
 name = "mcp-types"
 version = "0.0.0"
+source = "git+https://github.com/zed-industries/codex?rev=e1268010080cd533fe85a8e6a946293331e6570f#e1268010080cd533fe85a8e6a946293331e6570f"
 dependencies = [
  "schemars 0.8.22",
  "serde",
@@ -3515,7 +3541,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4c5cc86750666a3ed20bdaf5ca2a0344f9c67674cae0515bec2da16fbaa47db"
 dependencies = [
  "fixedbitset",
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
 ]
 
 [[package]]
@@ -3681,7 +3707,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3ef4f2f0422f23a82ec9f628ea2acd12871c81a9362b02c43c1aa86acfc3ba1"
 dependencies = [
  "futures",
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "nix 0.30.1",
  "tokio",
  "tracing",
@@ -4413,7 +4439,7 @@ version = "1.0.145"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "402a6f66d8c709116cf22f558eab210f5a50187f702eb4d7e5ef38d9a7f1c79c"
 dependencies = [
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "itoa",
  "memchr",
  "ryu",
@@ -4474,7 +4500,7 @@ dependencies = [
  "chrono",
  "hex",
  "indexmap 1.9.3",
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "schemars 0.9.0",
  "schemars 1.1.0",
  "serde_core",
@@ -4573,9 +4599,9 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "signal-hook-registry"
-version = "1.4.6"
+version = "1.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2a4719bff48cee6b39d12c020eeb490953ad2443b7055bd0b21fca26bd8c28b"
+checksum = "7664a098b8e616bdfcc2dc0e9ac44eb231eedf41db4e9fe95d8d32ec728dedad"
 dependencies = [
  "libc",
 ]
@@ -5187,7 +5213,7 @@ version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0dc8b1fb61449e27716ec0e1bdf0f6b8f3e8f6b05391e8497b8b6d7804ea6d8"
 dependencies = [
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "serde_core",
  "serde_spanned",
  "toml_datetime",
@@ -5211,7 +5237,7 @@ version = "0.23.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6485ef6d0d9b5d0ec17244ff7eb05310113c3f316f2d14200d4de56b3cb98f8d"
 dependencies = [
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "toml_datetime",
  "toml_parser",
  "toml_writer",
@@ -5272,7 +5298,7 @@ checksum = "d039ad9159c98b70ecfd540b2573b97f7f52c3e8d9f8ad57a24b916a536975f9"
 dependencies = [
  "futures-core",
  "futures-util",
- "indexmap 2.12.0",
+ "indexmap 2.12.1",
  "pin-project-lite",
  "slab",
  "sync_wrapper",
@@ -6294,18 +6320,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.27"
+version = "0.8.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0894878a5fa3edfd6da3f88c4805f4c8558e2b996227a3d864f47fe11e38282c"
+checksum = "43fa6694ed34d6e57407afbccdeecfa268c470a7d2a5b0cf49ce9fcc345afb90"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.27"
+version = "0.8.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d2b8d9c68ad2b9e4340d7832716a4d21a22a1154777ad56ea55c51a9cf3831"
+checksum = "c640b22cd9817fae95be82f0d2f90b11f7605f6c319d16705c459b27ac2cbc26"
 dependencies = [
  "proc-macro2",
  "quote",
