@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 use agent_client_protocol::{McpServer, ModelId, SessionId, SessionModeId};
-use codex_common::approval_presets::{builtin_approval_presets, ApprovalPreset};
+use codex_common::approval_presets::{ApprovalPreset, builtin_approval_presets};
 use codex_core::config::Config;
 use codex_core::protocol::{AskForApproval, SandboxPolicy};
 use codex_protocol::config_types::ReasoningEffort;
@@ -71,18 +71,21 @@ impl SessionPersistenceSettings {
         let mut enabled = env_flag.unwrap_or(false);
         let mut directory = env_dir.clone();
 
-        if let Some(flag) = cli.flag {
+        let cli_flag = cli.flag();
+        let cli_path = cli.path();
+
+        if let Some(flag) = cli_flag {
             enabled = flag;
         }
 
-        if let Some(path) = &cli.path {
-            directory = Some(path.clone());
-            if cli.flag.is_none() {
+        if let Some(path) = cli_path {
+            directory = Some(path);
+            if cli_flag.is_none() {
                 enabled = true;
             }
         }
 
-        if directory.is_none() && env_dir.is_some() && env_flag.is_none() && cli.flag.is_none() {
+        if directory.is_none() && env_dir.is_some() && env_flag.is_none() && cli_flag.is_none() {
             // Setting CODEX_SESSION_DIR should imply enabling persistence unless explicitly disabled.
             enabled = true;
         }
@@ -280,22 +283,17 @@ fn write_manifest(path: &Path, records: &HashMap<String, SessionRecord>) -> io::
 pub(crate) fn split_model_id(
     model_id: &str,
 ) -> Result<(String, ReasoningEffort), serde_json::Error> {
-    let (model, reasoning) = model_id
-        .split_once('/')
-        .ok_or_else(|| {
-            serde_json::Error::io(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "invalid model identifier",
-            ))
-        })?;
+    let (model, reasoning) = model_id.split_once('/').ok_or_else(|| {
+        serde_json::Error::io(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "invalid model identifier",
+        ))
+    })?;
     let effort: ReasoningEffort = serde_json::from_value(reasoning.into())?;
     Ok((model.to_string(), effort))
 }
 
-pub fn apply_session_config_overrides(
-    config: &mut Config,
-    record: &SessionRecord,
-) {
+pub fn apply_session_config_overrides(config: &mut Config, record: &SessionRecord) {
     config.cwd.clone_from(&record.cwd);
 
     if let Some(approval) = record.approval_policy {

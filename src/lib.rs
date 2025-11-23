@@ -2,7 +2,6 @@
 #![deny(clippy::print_stdout, clippy::print_stderr)]
 
 use agent_client_protocol::AgentSideConnection;
-use codex_common::CliConfigOverrides;
 use codex_core::config::{Config, ConfigOverrides};
 use std::path::PathBuf;
 use std::sync::{Arc, OnceLock};
@@ -12,6 +11,7 @@ use tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
 use tracing_subscriber::EnvFilter;
 
 mod cli;
+pub use cli::CliArgs;
 mod codex_agent;
 mod command_executor;
 mod conversation;
@@ -32,7 +32,7 @@ pub static ACP_CLIENT: OnceLock<Arc<AgentSideConnection>> = OnceLock::new();
 /// If unable to parse the config or start the program.
 pub async fn run_main(
     _codex_linux_sandbox_exe: Option<PathBuf>,
-    cli_config_overrides: CliConfigOverrides,
+    cli_args: CliArgs,
 ) -> IoResult<()> {
     // Install a simple subscriber so `tracing` output is visible.
     // Users can control the log level with `RUST_LOG`.
@@ -41,12 +41,10 @@ pub async fn run_main(
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    let session_persist = cli::parse_launch_args().map_err(|err| {
-        std::io::Error::new(
-            std::io::ErrorKind::InvalidInput,
-            format!("failed to parse arguments: {err}"),
-        )
-    })?;
+    let CliArgs {
+        config_overrides: cli_config_overrides,
+        session: session_persist,
+    } = cli_args;
 
     // Parse CLI overrides and load configuration
     let cli_kv_overrides = cli_config_overrides.parse_overrides().map_err(|e| {

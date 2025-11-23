@@ -1,11 +1,9 @@
 use crate::ACP_CLIENT;
-use agent_client_protocol::{
-    AgentSideConnection, Client, Error, ReadTextFileRequest, SessionId,
-};
+use agent_client_protocol::{AgentSideConnection, Client, Error, ReadTextFileRequest, SessionId};
 use async_trait::async_trait;
 use codex_core::{
-    config::Config, register_external_tool_handler, FunctionCallError, ToolHandler, ToolInvocation,
-    ToolKind, ToolOutput, ToolPayload,
+    FunctionCallError, ToolHandler, ToolInvocation, ToolKind, ToolOutput, ToolPayload,
+    config::Config, register_external_tool_handler,
 };
 use codex_protocol::ConversationId;
 use codex_utils_string::take_bytes_at_char_boundary;
@@ -45,8 +43,7 @@ impl ToolHandler for RemoteReadFileHandler {
 
     async fn handle(&self, invocation: ToolInvocation) -> Result<ToolOutput, FunctionCallError> {
         let payload = invocation.payload.clone();
-        let session_id =
-            session_id_from_conversation_id(&invocation.conversation_id());
+        let session_id = session_id_from_conversation_id(&invocation.conversation_id());
 
         let arguments = match payload {
             ToolPayload::Function { arguments } => arguments,
