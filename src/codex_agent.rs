@@ -31,6 +31,7 @@ use crate::{
     session_store::{self, SessionRecord, SessionStore},
     tool_executor::ACPExecutor,
 };
+use codex_core::{default_tool_executor, DynToolExecutor};
 
 /// The Codex implementation of the ACP Agent trait.
 ///
@@ -53,7 +54,7 @@ pub struct CodexAgent {
 
 impl CodexAgent {
     /// Create a new `CodexAgent` with the given configuration
-    pub fn new(config: Config, session_store: SessionStore) -> Self {
+    pub fn new(config: Config, session_store: SessionStore, native_shell: bool) -> Self {
         let auth_manager = AuthManager::shared(
             config.codex_home.clone(),
             false,
@@ -62,10 +63,16 @@ impl CodexAgent {
 
         let client_capabilities: Arc<Mutex<ClientCapabilities>> = Arc::default();
 
+        let tool_executor: DynToolExecutor = if native_shell {
+            default_tool_executor()
+        } else {
+            ACPExecutor::shared()
+        };
+
         let conversation_manager = ConversationManager::with_tool_executor(
             auth_manager.clone(),
             SessionSource::Unknown,
-            ACPExecutor::shared(),
+            tool_executor,
         );
 
         Self {

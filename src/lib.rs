@@ -44,6 +44,7 @@ pub async fn run_main(
     let CliArgs {
         config_overrides: cli_config_overrides,
         session: session_persist,
+        native_shell,
     } = cli_args;
 
     // Parse CLI overrides and load configuration
@@ -71,7 +72,11 @@ pub async fn run_main(
     let session_store = session_store::SessionStore::new(persistence_settings);
 
     // Create our Agent implementation with notification channel
-    let agent = Rc::new(codex_agent::CodexAgent::new(config, session_store));
+    let agent = Rc::new(codex_agent::CodexAgent::new(
+        config,
+        session_store,
+        native_shell,
+    ));
 
     let stdin = tokio::io::stdin().compat();
     let stdout = tokio::io::stdout().compat_write();

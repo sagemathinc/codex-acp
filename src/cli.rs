@@ -10,6 +10,9 @@ pub struct CliArgs {
     /// Session persistence flags
     #[command(flatten)]
     pub session: SessionPersistCli,
+    /// Use Codex's native shell sandbox instead of ACP terminal proxy.
+    #[arg(long = "native-shell")]
+    pub native_shell: bool,
 }
 
 #[derive(Args, Debug, Default, Clone)]
