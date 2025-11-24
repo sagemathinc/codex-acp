@@ -1,5 +1,20 @@
 # ACP adapter for Codex
 
+## CoCalc Fork-specific changes
+
+This fork exists so we can fully use [Codex](https://github.com/openai/codex) from [ACP-compatible](https://agentclientprotocol.com) clients such as [CoCalc](https://cocalc.com), with resumable sessions, remote code and file execution in a CoCalc project, and file diffs.
+
+The fork includes the following changes from upstream:
+
+- Track our `sagemathinc/codex` fork so we can use the custom tool executor, `ConversationId` plumbing, and overridable tool handlers that are needed for ACP-aware integrations.
+- Replace the ad-hoc CLI parsing with `clap`, expose `--session-persist`, `--session-persist=/path`, `--no-session-persist`, and add `--native-shell` for opting into Codex's local sandbox instead of ACP's terminal proxy.
+- Introduce an `ACPExecutor` and background command dispatcher that translate Codex shell requests into ACP terminal calls (and fall back to the native executor when requested) so every tool call runs inside the remote ACP session.
+- Implement remote `apply_patch` by fetching files over ACP, applying hunks in memory via the exported `codex-apply-patch` helpers, ensuring parent directories exist, and writing the results back through ACP (deleting or moving files via ACP shell commands when necessary).
+- Register a remote `read_file` tool handler that streams data through ACP, supports slice and indentation modes, and ensures GPT-5 model families advertise the tool so IDE clients can call it; this replaces the built-in filesystem reader entirely.
+- Extend session persistence/logging: CLI overrides feed directly into `SessionStore`, ACP initialization logs the client's filesystem/terminal capabilities, and token usage metadata gets forwarded in ACP notifications with better warning logs on read/write failures.
+
+# Original Readme
+
 Use [Codex](https://github.com/openai/codex) from [ACP-compatible](https://agentclientprotocol.com) clients such as [Zed](https://zed.dev)!
 
 This tool implements an ACP adapter around the Codex CLI, supporting:
