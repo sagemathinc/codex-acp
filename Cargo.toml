@@ -1,12 +1,12 @@
 [package]
 name = "codex-acp"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2024"
-authors = ["Zed <hi@zed.dev>"]
+authors = ["Zed <hi@zed.dev>", "William Stein <wstein@sagemath.com>"]
 license = "Apache-2.0"
-description = "An ACP-compatible coding agent powered by Codex"
-repository = "https://github.com/zed-industries/codex-acp"
-homepage = "https://github.com/zed-industries/codex-acp"
+description = "An ACP-compatible coding agent powered by Codex with support for hookable file and terminal handling"
+repository = "https://github.com/sagemathinc/codex-acp"
+homepage = "https://github.com/sagemathinc/codex-acp"
 
 [[bin]]
 name = "codex-acp"
