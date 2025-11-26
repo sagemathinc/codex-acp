@@ -1,0 +1,226 @@
+name: cocalc-binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  metadata:
+    name: Compute version and pinned codex revision
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      codex_rev: ${{ steps.meta.outputs.codex_rev }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version and codex git rev
+        id: meta
+        run: |
+          python - <<'PY' >>"$GITHUB_OUTPUT"
+          from pathlib import Path
+          import re
+          import tomllib
+
+          cargo = tomllib.loads(Path("Cargo.toml").read_text())
+          version = cargo["package"]["version"]
+
+          text = Path("Cargo.toml").read_text()
+          m = re.search(r'rev\s*=\s*"([0-9a-f]+)"', text)
+          if not m:
+            raise SystemExit("could not find codex git rev in Cargo.toml")
+
+          print(f"version={version}")
+          print(f"codex_rev={m.group(1)}")
+          PY
+
+  build-acp:
+    name: Build codex-acp (${{ matrix.target }})
+    needs: metadata
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - runner: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+          - runner: macos-14
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust 1.90
+        uses: dtolnay/rust-toolchain@1.90
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-cargo-git-
+
+      - name: Cache target
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-cargo-target-
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package codex-acp
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.metadata.outputs.version }}"
+          TARGET="${{ matrix.target }}"
+          BIN_PATH="target/${TARGET}/release/codex-acp"
+          ARCHIVE="codex-acp-${VERSION}-${TARGET}.tar.gz"
+
+          tar -C "$(dirname "$BIN_PATH")" -czf "$ARCHIVE" "$(basename "$BIN_PATH")"
+
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$ARCHIVE" > "${ARCHIVE}.sha256"
+          else
+            shasum -a 256 "$ARCHIVE" > "${ARCHIVE}.sha256"
+          fi
+
+          ls -l "$ARCHIVE" "${ARCHIVE}.sha256"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-acp-${{ matrix.target }}
+          path: |
+            codex-acp-${{ needs.metadata.outputs.version }}-${{ matrix.target }}.tar.gz
+            codex-acp-${{ needs.metadata.outputs.version }}-${{ matrix.target }}.tar.gz.sha256
+
+  build-sandbox:
+    name: Build codex-linux-sandbox (${{ matrix.target }})
+    needs: metadata
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - runner: ubuntu-22.04-arm
+            target: aarch64-unknown-linux-gnu
+    runs-on: ${{ matrix.runner }}
+    env:
+      CODEX_REV: ${{ needs.metadata.outputs.codex_rev }}
+    steps:
+      - name: Checkout codex-acp (for version info)
+        uses: actions/checkout@v4
+
+      - name: Checkout codex (pinned to Cargo.toml rev)
+        uses: actions/checkout@v4
+        with:
+          repository: sagemathinc/codex
+          ref: ${{ env.CODEX_REV }}
+          path: codex
+
+      - name: Install Rust 1.90
+        uses: dtolnay/rust-toolchain@1.90
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-${{ matrix.target }}-sandbox-cargo-registry-${{ hashFiles('codex/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-sandbox-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-${{ matrix.target }}-sandbox-cargo-git-${{ hashFiles('codex/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-sandbox-cargo-git-
+
+      - name: Cache target
+        uses: actions/cache@v4
+        with:
+          path: codex/codex-rs/target
+          key: ${{ runner.os }}-${{ matrix.target }}-sandbox-cargo-target-${{ hashFiles('codex/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-sandbox-cargo-target-
+
+      - name: Build
+        working-directory: codex/codex-rs
+        run: cargo build --release --target ${{ matrix.target }} --package codex-linux-sandbox
+
+      - name: Package codex-linux-sandbox
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.metadata.outputs.version }}"
+          TARGET="${{ matrix.target }}"
+          BIN_PATH="codex/codex-rs/target/${TARGET}/release/codex-linux-sandbox"
+          ARCHIVE="codex-linux-sandbox-${VERSION}-${TARGET}.tar.gz"
+
+          tar -C "$(dirname "$BIN_PATH")" -czf "$ARCHIVE" "$(basename "$BIN_PATH")"
+
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$ARCHIVE" > "${ARCHIVE}.sha256"
+          else
+            shasum -a 256 "$ARCHIVE" > "${ARCHIVE}.sha256"
+          fi
+
+          ls -l "$ARCHIVE" "${ARCHIVE}.sha256"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-linux-sandbox-${{ matrix.target }}
+          path: |
+            codex-linux-sandbox-${{ needs.metadata.outputs.version }}-${{ matrix.target }}.tar.gz
+            codex-linux-sandbox-${{ needs.metadata.outputs.version }}-${{ matrix.target }}.tar.gz.sha256
+
+  release:
+    name: Publish GitHub release
+    needs:
+      - metadata
+      - build-acp
+      - build-sandbox
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: ls -R artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: codex-acp ${{ needs.metadata.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+          files: artifacts/**/*

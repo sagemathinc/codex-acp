@@ -1,8 +1,11 @@
-# ACP adapter for Codex
+# ACP adapter for Codex (used in CoCalc)
+
+**DISCLAIMER:** This repo and the corresponding binaries are *NOT* in any way associated with Zed Industries or OpenAI.  They are instead a product of Sagemath, Inc. and are needed for https://cocalc.com .
+
+This fork exists so we can fully use [Codex](https://github.com/openai/codex) from [ACP-compatible](https://agentclientprotocol.com) clients such as [CoCalc](https://cocalc.com), with resumable sessions, remote code and file execution in a CoCalc project, and file diffs.
 
 ## CoCalc Fork-specific changes
 
-This fork exists so we can fully use [Codex](https://github.com/openai/codex) from [ACP-compatible](https://agentclientprotocol.com) clients such as [CoCalc](https://cocalc.com), with resumable sessions, remote code and file execution in a CoCalc project, and file diffs.
 
 The fork includes the following changes from upstream:
 
@@ -69,6 +72,14 @@ Or via npm:
 
 ```
 npx @zed-industries/codex-acp
+```
+
+#### macOS quarantine note
+
+Release binaries are unsigned. If you download on macOS, clear the quarantine bit before first run:
+
+```
+xattr -d com.apple.quarantine ./codex-acp
 ```
 
 ### Session persistence
