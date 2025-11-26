@@ -31,7 +31,7 @@ pub static ACP_CLIENT: OnceLock<Arc<AgentSideConnection>> = OnceLock::new();
 ///
 /// If unable to parse the config or start the program.
 pub async fn run_main(
-    _codex_linux_sandbox_exe: Option<PathBuf>,
+    codex_linux_sandbox_exe: Option<PathBuf>,
     cli_args: CliArgs,
 ) -> IoResult<()> {
     // Install a simple subscriber so `tracing` output is visible.
@@ -47,6 +47,14 @@ pub async fn run_main(
         native_shell,
     } = cli_args;
 
+    let sandbox_path = codex_linux_sandbox_exe
+        .or_else(|| std::env::var_os("CODEX_LINUX_SANDBOX_EXE").map(PathBuf::from));
+    if let Some(path) = sandbox_path.as_deref() {
+        tracing::info!("using codex-linux-sandbox binary at {}", path.display());
+    } else {
+        tracing::warn!("codex-linux-sandbox path not provided; sandboxed runs will fall back to codex defaults");
+    }
+
     // Parse CLI overrides and load configuration
     let cli_kv_overrides = cli_config_overrides.parse_overrides().map_err(|e| {
         std::io::Error::new(
@@ -55,7 +63,12 @@ pub async fn run_main(
         )
     })?;
 
-    let mut config = Config::load_with_cli_overrides(cli_kv_overrides, ConfigOverrides::default())
+    let overrides = ConfigOverrides {
+        codex_linux_sandbox_exe: sandbox_path,
+        ..ConfigOverrides::default()
+    };
+
+    let mut config = Config::load_with_cli_overrides(cli_kv_overrides, overrides)
         .await
         .map_err(|e| {
             std::io::Error::new(
