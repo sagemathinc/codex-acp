@@ -23,6 +23,7 @@ use std::{
     path::{Path, PathBuf},
     rc::Rc,
     sync::{Arc, Mutex},
+    time::Instant,
 };
 use tracing::{debug, info, warn};
 
@@ -48,6 +49,10 @@ pub struct CodexAgent {
     conversation_manager: ConversationManager,
     /// Active sessions mapped by `SessionId`
     sessions: Rc<RefCell<HashMap<SessionId, Rc<Conversation>>>>,
+    /// Last access timestamps for active sessions (used for eviction)
+    session_access: Rc<RefCell<HashMap<SessionId, Instant>>>,
+    /// Maximum active sessions to keep resident (None = unlimited)
+    max_active_sessions: Option<usize>,
     /// Persistent session manifest store
     session_store: SessionStore,
 }
@@ -75,12 +80,20 @@ impl CodexAgent {
             tool_executor,
         );
 
+        let max_active_sessions = std::env::var("CODEX_MAX_ACTIVE_SESSIONS")
+            .or_else(|_| std::env::var("COCALC_ACP_MAX_SESSIONS"))
+            .ok()
+            .and_then(|s| s.parse::<usize>().ok())
+            .filter(|v| *v > 0);
+
         Self {
             auth_manager,
             client_capabilities,
             config,
             conversation_manager,
             sessions: Rc::default(),
+            session_access: Rc::default(),
+            max_active_sessions,
             session_store,
         }
     }
@@ -212,13 +225,78 @@ impl CodexAgent {
         SessionId(conversation_id.to_string().into())
     }
 
+    fn record_access(&self, session_id: &SessionId) {
+        self.session_access
+            .borrow_mut()
+            .insert(session_id.clone(), Instant::now());
+    }
+
+    fn evict_if_needed(&self, protect: Option<&SessionId>) {
+        let Some(limit) = self.max_active_sessions else {
+            return;
+        };
+
+        loop {
+            let current_len = self.sessions.borrow().len();
+            if current_len <= limit {
+                break;
+            }
+
+            // Snapshot access times and current session IDs to avoid nested borrows.
+            let access_snapshot: HashMap<SessionId, Instant> = self
+                .session_access
+                .borrow()
+                .iter()
+                .map(|(k, v)| (k.clone(), *v))
+                .collect();
+            let session_ids: Vec<SessionId> = self
+                .sessions
+                .borrow()
+                .keys()
+                .cloned()
+                .collect::<Vec<_>>();
+
+            let mut candidate: Option<(SessionId, Instant)> = None;
+            for id in session_ids {
+                if protect.is_some() && protect.unwrap() == &id {
+                    continue;
+                }
+                let ts = access_snapshot
+                    .get(&id)
+                    .cloned()
+                    // If unknown, treat as now (never seen).
+                    .unwrap_or_else(Instant::now);
+                match candidate {
+                    None => candidate = Some((id, ts)),
+                    Some((_, current)) if ts < current => candidate = Some((id, ts)),
+                    _ => {}
+                }
+            }
+
+            let Some((evict_id, _)) = candidate else {
+                break;
+            };
+            if self.sessions.borrow_mut().remove(&evict_id).is_some() {
+                self.session_access.borrow_mut().remove(&evict_id);
+                info!(
+                    "Evicted session {} to enforce max_active_sessions={}",
+                    evict_id, limit
+                );
+            } else {
+                break;
+            }
+        }
+    }
+
     fn get_conversation(&self, session_id: &SessionId) -> Result<Rc<Conversation>, Error> {
-        Ok(self
+        let conversation = self
             .sessions
             .borrow()
             .get(session_id)
             .ok_or_else(|| Error::resource_not_found(None))?
-            .clone())
+            .clone();
+        self.record_access(session_id);
+        Ok(conversation)
     }
 
     fn check_auth(&self) -> Result<(), Error> {
@@ -397,6 +475,8 @@ impl Agent for CodexAgent {
         self.sessions
             .borrow_mut()
             .insert(session_id.clone(), conversation);
+        self.record_access(&session_id);
+        self.evict_if_needed(Some(&session_id));
 
         if self.session_store.is_enabled() {
             let record = Self::build_session_record(
@@ -488,6 +568,8 @@ impl Agent for CodexAgent {
         self.sessions
             .borrow_mut()
             .insert(session_id.clone(), conversation);
+        self.record_access(&session_id);
+        self.evict_if_needed(Some(&session_id));
 
         let updated_record = Self::build_session_record(
             &session_id,

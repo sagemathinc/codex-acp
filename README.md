@@ -15,6 +15,7 @@ The fork includes the following changes from upstream:
 - Implement remote `apply_patch` by fetching files over ACP, applying hunks in memory via the exported `codex-apply-patch` helpers, ensuring parent directories exist, and writing the results back through ACP (deleting or moving files via ACP shell commands when necessary).
 - Register a remote `read_file` tool handler that streams data through ACP, supports slice and indentation modes, and ensures GPT-5 model families advertise the tool so IDE clients can call it; this replaces the built-in filesystem reader entirely.
 - Extend session persistence/logging: CLI overrides feed directly into `SessionStore`, ACP initialization logs the client's filesystem/terminal capabilities, and token usage metadata gets forwarded in ACP notifications with better warning logs on read/write failures.
+- Our fork of codex-acp supports an environment variable to limit resident Codex sessions and avoid excessive RAM use: set `COCALC_ACP_MAX_SESSIONS=<number>` (or `CODEX_MAX_ACTIVE_SESSIONS`) before starting it to cap the in-memory sessions; evicted sessions are reloaded from the on-disk manifest when needed.
 
 # Original Readme
 
